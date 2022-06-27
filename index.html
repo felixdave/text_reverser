@@ -1,0 +1,442 @@
+<!-- 
+
+author: David Badillo 
+email: david@neatify.io
+
+## Note:
+- A better CSS reset could have been used, I didn't want to have too much code that wasn't my own. 
+- An SVG from Bootstrap Icons was used and inserted through JS
+
+## Requirements: 
+- [x] Allows the user to input a string between 2 and 300 characters
+- [x] Displays the entire input string in an input area on the page so all input text is visible.
+- [X] Reverse the entire string, Example ‘The dog was fast’ becomes ‘tsaf saw god ehT’ 
+- [x] Displays the entire output string in an output area on the page so all output text is visible.
+- [X] You can reverse with each character entered or onsubmit. 
+- [x] Have a way to clear/reset the page to allow the user to start over. 
+- [x] Add instructions on the page which describe:
+    - What the page does.
+    - What you want the user to do.
+    - Handle errors
+- [x] Again, all code, HTML, CSS, and JavaScript should be inline. 
+
+## Additional Features:
+- Responsive page
+- Notification alert and animation at 1 & 300 characters
+- Fade out animation when resetting 
+- Added character counter activated by typing and pasting
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Text Reverser</title>
+		<!-- CSS Reset -->
+		<style>
+			/* Better CSS reset @ http://meyerweb.com/eric/tools/css/reset/ */
+			* {
+				padding: 0;
+				margin: 0;
+			}
+		</style>
+		<!-- CSS: Main -->
+		<style>
+			/* Variables  */
+
+			:root {
+				--blue-dark-2: #002437;
+				--blue-dark-1: #005380;
+				--blue: #00a6ff;
+				--blue-light-1: #49bfff;
+				--blue-light-2: #c8ecff;
+				--warning: #ff5900;
+			}
+
+			/* Hover selection */
+
+			::-moz-selection {
+				/* Code for Firefox */
+				color: #fff;
+				background: var(--blue);
+			}
+
+			::selection {
+				color: #fff;
+				background: var(--blue);
+			}
+
+			/*** Body */
+
+			body {
+				font-family: sans-serif;
+			}
+
+			/*** Main container */
+
+			#container {
+				display: flex;
+				flex-direction: column;
+				justify-content: flex-start;
+				height: 100vh;
+			}
+
+			/* Headers, Paragraphs, & list Items */
+
+			p,
+			li,
+			h1,
+			h2,
+			h3 {
+				padding: 8px;
+				list-style: outside;
+			}
+			li {
+				margin-left: 2rem;
+			}
+			header {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				padding: 1rem 2rem;
+				margin-bottom: 1rem;
+			}
+
+			h1 {
+				font-size: 3rem;
+				color: var(--blue);
+			}
+			h2 {
+				color: #005380;
+			}
+			h3 {
+				color: var(--blue-dark-2);
+				font-weight: bold;
+			}
+
+			/*** Main */
+
+			main {
+				background-color: #fff;
+				color: var(--blue-dark-1);
+				margin: 0 auto;
+				width: 100%;
+				max-width: 1000px;
+			}
+
+			/*** HowTo */
+
+			main #howTo {
+				padding: 1rem;
+			}
+
+			/*** Form - Main Textareas */
+
+			form {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+				padding: 8px 16px;
+				gap: 0.5rem 1rem;
+			}
+			/* Both textarea elements  */
+			form textarea {
+				font-size: 1rem;
+				border-color: var(--blue);
+				background-color: var(--blue-light-2);
+				border-radius: 5px;
+				resize: none;
+				height: 10rem;
+				padding: 8px;
+				transition: all 1s ease-in-out;
+			}
+			/* Input area */
+			form textarea#inputArea {
+				grid-column: 1/1;
+				grid-row: 1/2;
+				overflow-y: scroll;
+			}
+			/* Reversed text display area */
+			form textarea#reversedArea {
+				text-align: right;
+				background-color: transparent;
+			}
+			/* Textarea placeholder styling  */
+			form #inputArea::placeholder {
+				color: var(--blue-dark-1);
+			}
+			form #reversedArea::placeholder {
+				padding-top: 4rem;
+				text-align: center;
+			}
+			/*** Input area HUD */
+			form .hudArea {
+				grid-column: 1/1;
+				grid-row: 1/2;
+				align-self: flex-end;
+				padding: 8px;
+			}
+			form #counter {
+				justify-self: flex-end;
+				background-color: #fff;
+				border-radius: 5px;
+				position: relative;
+				right: 8px;
+				bottom: 8px;
+				transition: all 0.2s ease-in-out;
+				cursor: pointer;
+			}
+			form #counter:hover {
+				opacity: 1;
+			}
+			form #notification {
+				justify-self: center;
+				padding-right: 16px;
+				transition: all 0.5s ease;
+			}
+			/*** Button */
+			form button {
+				/* grid */
+				grid-column: 1/2;
+				grid-row: 3/4;
+				align-self: flex-start;
+				/* fonts & color */
+				background-color: #00a6ff;
+				color: #fff;
+				font-weight: bold;
+				letter-spacing: 3px;
+				text-transform: uppercase;
+				/* borders & padding */
+				border: 1px solid var(--blue-light-1);
+				border-radius: 50px;
+				padding: 8px 16px;
+				box-shadow: 6px 6px 12px #c7c8c8, -6px -6px 12px #fafafa;
+			}
+			form button:hover {
+				background: linear-gradient(145deg, #00b7ff, #0095e6);
+				border-radius: 50px;
+				box-shadow: 6px 6px 12px #cecece, -6px -6px 12px #ffffff;
+				cursor: pointer;
+			}
+			form button:active {
+				background-color: #00a6ff;
+				color: var(--blue-light-2);
+				border-radius: 50px;
+				box-shadow: inset 6px 6px 12px #008dd9, inset -6px -6px 12px #00bfff;
+			}
+
+			/*** Javascript insertion styles */
+
+			.warning {
+				background-color: var(--warning);
+				color: #fff;
+				border-radius: 5px;
+				position: relative;
+				bottom: 1rem;
+				animation-delay: 250ms;
+				cursor: pointer;
+			}
+			.warning svg {
+				position: relative;
+				top: 2px;
+			}
+			/* for HUD */
+			.displayNone {
+				display: none;
+			}
+			/* for reset */
+			.fade {
+				opacity: 0;
+			}
+			/* for notification*/
+			.subtle {
+				background-color: transparent;
+				color: var(--warning);
+				bottom: 11rem; /* Based on 10rem height of input*/
+			}
+			/* for counter */
+			.bright {
+				opacity: 1;
+				border: 2px solid var(--warning);
+			}
+			.dim {
+				opacity: 0.5;
+				border: 2px solid transparent;
+			}
+		</style>
+		<!-- JS: Main -->
+		<script>
+			window.addEventListener('DOMContentLoaded', function () {
+				const btn = document.querySelector('button');
+				const inputArea = document.querySelector('#inputArea');
+				const reversedArea = document.querySelector('#reversedArea');
+				const notification = document.querySelector('#notification');
+
+				// Reverse string func
+				const reverseString = (str) => {
+					return str.split('').reverse().join('');
+				};
+
+				// Notification
+				const notifyUser = (charCount) => {
+					// Img source: https://icons.getbootstrap.com/
+					const warningImg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="16" fill="currentColor" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
+						<path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+						</svg>`;
+					// Reset notification
+					notification.classList.remove('subtle');
+					// Warnings based on count
+					if (charCount == 300) {
+						notification.innerHTML = `${warningImg} Character limit exceeded `;
+					} else {
+						notification.innerHTML = `${warningImg} Must be more than 1 character`;
+						reversedArea.value = ``;
+					}
+				};
+
+				// Update text count
+				const updateTextCount = (charValue) => {
+					const counter = document.querySelector('#counter');
+					const moveDelay = 3000;
+					let charCount;
+
+					charValue == null ? (charCount = 0) : (charCount = charValue.length);
+					// If count is 1 or 300 then animate alert
+					if (charCount == 1 || charCount == 300) {
+						notification.classList.remove('displayNone');
+						setTimeout(() => {
+							// Move notification away from text area
+							notification.classList.add('subtle');
+						}, moveDelay);
+						// Highlight counter
+						counter.classList.remove('dim');
+						counter.classList.add('bright');
+						// Conditional note
+						notifyUser(charCount);
+					} // if count is not 1 or 300:
+					else {
+						// Hide & reset notification
+						notification.classList.add('displayNone');
+						notification.classList.remove('subtle');
+						// Remove counter highlight
+						counter.classList.remove('bright');
+						counter.classList.add('dim');
+					}
+					counter.innerHTML = `${charCount}/300`;
+				};
+
+				// Clear all text and focus on input area
+				const clearAll = () => {
+					inputArea.value = '';
+					reversedArea.value = '';
+					updateTextCount(null);
+					inputArea.focus();
+				};
+
+				// Display reversed text
+				const displayReversedText = () => {
+					const charValue = inputArea.value;
+					const charCount = charValue.length;
+
+					// Only if char count is 2 - 300, display reversed text
+					if (charCount >= 2 && charCount < 300) {
+						reversedArea.value = reverseString(charValue);
+					}
+					// If char count is 0, clear & reset
+					else if (charCount == 0) {
+						clearAll();
+					}
+					//Keep char count up to date
+					updateTextCount(charValue);
+				};
+
+				// Pre-reset fadeout
+				const fadeOutIn = (el, delay) => {
+					el.classList.add('fade');
+					setTimeout(() => {
+						el.classList.remove('fade');
+					}, delay);
+				};
+
+				// Clear all & fade animate
+				btn.addEventListener('click', function (e) {
+					const textArea = document.querySelectorAll('textarea');
+					const warning = document.querySelector('.warning');
+					const delay = 700;
+
+					// Stop page from reloading
+					e.preventDefault();
+
+					// Fadeout warning & both text areas
+					fadeOutIn(warning, delay);
+					textArea.forEach((el) => {
+						fadeOutIn(el, delay);
+					});
+
+					// Delay the clear all
+					setTimeout(() => {
+						clearAll();
+					}, delay);
+				});
+
+				// Move alert away from text on click
+				const subtleNotification = () => {
+					notification.classList.toggle('subtle');
+				};
+
+				// On keyup and paste event run reverse character
+				inputArea.addEventListener('keyup', displayReversedText);
+				inputArea.addEventListener('paste', displayReversedText);
+
+				// On click move notification out of the way
+				notification.addEventListener('click', subtleNotification);
+
+				// Keyboard focus on input area
+				inputArea.focus();
+			});
+		</script>
+	</head>
+	<body>
+		<div id="container">
+			<!-- Header -->
+			<header>
+				<h1>Text Reverser</h1>
+				<h2>A text reverser app that displays reversed text as you type</h2>
+			</header>
+			<main>
+				<!-- Form -->
+				<form>
+					<label for="html" hidden>Enter text here</label>
+					<textarea
+						id="inputArea"
+						name="blueBox"
+						maxlength="300"
+						placeholder="Enter Text Here"
+					></textarea>
+					<div id="counter" class="hudArea dim">0/300</div>
+					<div id="notification" class="hudArea displayNone warning"></div>
+					<label for="html" hidden>Reversed Text</label>
+					<textarea
+						id="reversedArea"
+						name="whiteBox"
+						placeholder="Reversed text will appear here"
+						readonly
+					></textarea>
+					<button>Reset</button>
+				</form>
+				<!-- About -->
+				<div id="howTo">
+					<h3>How it works:</h3>
+					<ul>
+						<li>Enter 2 to 300 characters in the blue text box</li>
+						<li>The entered text will appear reversed in the white box</li>
+						<li>Click the reset button to clear all text and start over</li>
+					</ul>
+				</div>
+			</main>
+		</div>
+	</body>
+</html>
